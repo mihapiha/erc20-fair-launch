@@ -31,7 +31,7 @@ contract FairLaunch {
     error LaunchNotEndedYet();
     error NoPledge();
     error MultipleWithdraw();
-    error DeveloperOnlyFunction();
+    error DeveloperException();
     
     constructor() {
         developer = msg.sender;
@@ -41,7 +41,7 @@ contract FairLaunch {
     
     function giveToDev() external {
         if(msg.sender != developer)
-            revert DeveloperOnlyFunction();
+            revert DeveloperException();
             
         //prevent multiple withdraws
         if(tokenContract.balanceOf(msg.sender) != 0)
@@ -56,6 +56,10 @@ contract FairLaunch {
             
         if(msg.value == 0)
             revert NoPledge();
+            
+        //developer can't pledge otherwise he can't get dev stake
+        if(msg.sender == developer)
+            revert DeveloperException();
         
         //if first pledge then give initial amount of coins
         if(pledgeAmounts[msg.sender] == 0) {
