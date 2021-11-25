@@ -71,10 +71,6 @@ contract FairLaunch {
         if(block.timestamp < endTime)
             revert LaunchNotEndedYet();
         
-        //prevent multiple withdraws
-        if(tokenContract.balanceOf(msg.sender) != 0)
-            revert MultipleWithdraw();
-        
         uint256 pledgeStake = pledgeAmounts[msg.sender]; 
         
         if(pledgeStake == 0)
@@ -85,6 +81,9 @@ contract FairLaunch {
         // pledger gets amount proportional to his pledge relative to all pledges
         uint256 coinStake = availableSupply * pledgeStake / totalAmount;
         tokenContract.transfer(msg.sender, coinStake);
+        
+        //prevent multiple withdraws
+        pledgeAmounts[msg.sender] = 0;
     }
     
 }
