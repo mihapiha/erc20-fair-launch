@@ -17,7 +17,7 @@ contract FairLaunch {
     uint256 constant DEV_AMOUNT    = TOT_SUPPLY/DEV_STAKE;
     uint256 constant PLEDGER_SUPPLY= TOT_SUPPLY - DEV_AMOUNT;
     uint256 constant INIT_AMOUNT   = 1000; // amount of coins pledgers get _immidieatly_ regardles of amount pledged, but only once
-    uint    constant DURATION_DAYS = 60;   // 2 months of presale
+    uint    constant DURATION_DAYS = 60 days;   // 2 months of presale
     
     CCtoken public immutable tokenContract;
     address public  immutable developer;     //creator address
@@ -30,11 +30,12 @@ contract FairLaunch {
     error LaunchAlreadyEnded();
     error LaunchNotEndedYet();
     error NoPledge();
+    error MultipleWithdraw();
     error DeveloperOnlyFunction();
     
     constructor() {
         developer = msg.sender;
-        endTime = block.timestamp + DURATION_DAYS * 1 days;
+        endTime = block.timestamp + DURATION_DAYS;
         tokenContract = new CCtoken(TOT_SUPPLY);
     }
     
@@ -42,6 +43,10 @@ contract FairLaunch {
         if(msg.sender != developer)
             revert DeveloperOnlyFunction();
             
+        //prevent multiple withdraws
+        if(tokenContract.balanceOf(msg.sender) != 0)
+            revert MultipleWithdraw();
+        
         tokenContract.transfer(developer, tokenContract.totalSupply()/DEV_STAKE);
     }
     
@@ -65,6 +70,10 @@ contract FairLaunch {
     function claim() external {
         if(block.timestamp < endTime)
             revert LaunchNotEndedYet();
+        
+        //prevent multiple withdraws
+        if(tokenContract.balanceOf(msg.sender) != 0)
+            revert MultipleWithdraw();
         
         uint256 pledgeStake = pledgeAmounts[msg.sender]; 
         
