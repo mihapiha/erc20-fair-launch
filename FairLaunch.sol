@@ -3,11 +3,31 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @title Fair community token launch. Prevent rug pulls and ensure fair distribution of tokens.
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "https://github.com/Uniswap/v2-periphery/blob/master/contracts/interfaces/IUniswapV2Router02.sol";
 
 contract CCtoken is ERC20 {
     constructor(uint256 initialSupply) ERC20("CabbageCoin", "CC") {
         _mint(msg.sender, initialSupply);
     }
+}
+
+contract LiquidityLock {
+    //https://docs.quickswap.exchange/reference/smart-contracts/router02/
+    address internal constant quickswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+    IUniswapV2Router02 constant router = IUniswapV2Router02(quickswapRouter);
+    CCtoken immutable tokenContract;
+    address payable immutable user;
+    
+    constructor(CCtoken tokenContract_, address payable user_) payable {
+        tokenContract = tokenContract_;
+        user = user_;
+    }
+    
+    function exitPool() external {
+        
+        
+    }
+    
 }
 
 
@@ -17,7 +37,7 @@ contract FairLaunch {
     uint256 constant DEV_AMOUNT    = TOT_SUPPLY/DEV_STAKE;
     uint256 constant PLEDGER_SUPPLY= TOT_SUPPLY - DEV_AMOUNT;
     uint256 constant INIT_AMOUNT   = 1000; // amount of coins pledgers get _immidieatly_ regardles of amount pledged, but only once
-    uint    constant DURATION_DAYS = 60 days;   // 2 months of presale
+    uint    constant DURATION_DAYS = 2 minutes;   // 2 months of presale
     
     CCtoken public immutable tokenContract;
     address public  immutable developer;     //creator address
